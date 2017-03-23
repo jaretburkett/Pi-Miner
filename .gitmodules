@@ -1,0 +1,3 @@
+[submodule "cpuminer-multi"]
+	path = cpuminer-multi
+	url = https://github.com/tpruvot/cpuminer-multi.git
