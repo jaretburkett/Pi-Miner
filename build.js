@@ -1,5 +1,6 @@
 var exec = require('child_process').exec;
 var terminate = require('terminate');
+var path = require('path');
 
 // get platform info
 var os = require('os');
