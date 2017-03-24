@@ -52,8 +52,11 @@ function runAutogen(callback) {
     console.log('Running ./autogen.sh');
     child.stdout.on('data', function (data) {
         process.stdout.write(data);
+
         /*
          errors
+         Running ./autogen.sh
+         stderr: Makefile.am: installing './depcomp' -- ignore
          ./autogen.sh: line 8: aclocal: command not found  - mac - brew install automake
          */
     });
@@ -121,7 +124,7 @@ function make() {
         if (success) {
             console.log('Successfully built. All done.');
         } else {
-            console.log('Build Failed');
+            // console.log('Build Failed');
             showErrors(errors);
         }
         die();
@@ -130,12 +133,17 @@ function make() {
 
 function showErrors(arr){
     console.log('');
-    console.log('ERRORS:');
-    for(var i = 0; i < arr.length; i++){
-        console.log(arr[i]);
+    if(arr.length > 0){
+        console.log('ERRORS:');
+        for(var i = 0; i < arr.length; i++){
+            console.log(arr[i]);
+        }
+        console.log('');
+    } else {
+        console.log('Done');
     }
-    console.log('');
 }
+
 
 function configure() {
     var errors = [];

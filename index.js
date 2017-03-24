@@ -1,5 +1,10 @@
 var exec = require('child_process').exec;
 var terminate = require('terminate');
+String.prototype.contains = function(it) { return this.indexOf(it) != -1; };
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.split(search).join(replacement);
+};
 
 // get platform info
 var os = require('os');
@@ -8,22 +13,36 @@ var info = {
     cpus: os.cpus().length, // num of cpus
     platform: os.platform()
 };
+
+console.log('ARCH:', info.arch);
+console.log('CPUs:', info.cpus);
+console.log('PLATFORM:', info.platform);
+
 var config = require('./config');
 
-var minerData = {
-    cpu:[],
-    hashrate:0,
-
-
-};
-
+var minerData;
 var child;
 
+
+run();
 function run() {
+    // reset
+    minerData = {
+        cpu:[],
+        hashrate:0,
+        difficulty:0,
+        ratio:[0,0]
+    };
+    // build cpu profile
+    for(var i = 0; i < info.cpus; i++){
+        minerData.cpu.push({rate:0, type:''});
+    }
+
     var command = './cpuminer -a ' + config.algo + ' -o ' + config.url + ' -u ' + config.username + ' -p ' + config.password;
+    // console.log('Running:',command);
     child = exec('cd cpuminer-multi && ' + command);
     child.stdout.on('data', function (data) {
-        process.stdout.write(data);
+        // process.stdout.write(data);
         // console.log('stdout: ' + data);
         processOutput(data);
     });
@@ -31,16 +50,93 @@ function run() {
         processError(data)
     });
     child.on('close', function (code) {
-        console.log('closing code: ' + code);
+        // console.log('closing code: ' + code);
     });
 }
 
 function processOutput(data){
-    process.stdout.write(data);
+    data = data.toString();
+    try{
+        // clean
+        data = data.replaceAll('\u001b', '');
+        data = data.replaceAll('[33m', '');
+        data = data.replaceAll('[31m', '');
+        data = data.replaceAll('[0m', '');
+        data = data.replaceAll('[0m', '');
+        data = data.replaceAll('[01;37m', '');
+        data = data.replaceAll('[32m', '');
+        var tmp = data.split('] ');
+        var status = tmp[1];
+        if(status.contains('CPU')){
+            // console.log('tmp', tmp);
+            // process.stdout.write(data);
+            var cpuNUM = parseInt(tmp[1].split(' ')[1].replaceAll('#',''));
+            minerData.cpu[cpuNUM].rate = parseFloat(tmp[1].split(' ')[2]).toFixed(3);
+            minerData.cpu[cpuNUM].type = tmp[1].split(' ')[3].replaceAll('\n', '');
+
+            var str = 'CPUs: ';
+            for(var i = 0; i < minerData.cpu.length; i++){
+                str += minerData.cpu[i].rate + ' '+ minerData.cpu[i].type + '   ';
+            }
+            console.log(str);
+        } else if(status.contains('Stratum difficulty')){
+            minerData.difficulty = parseInt(tmp[1].split(' ')[4]);
+            console.log('Difficulty:', minerData.difficulty);
+        } else if(status.contains('JSON invalid')){
+            console.log('Problems connecting to server. Restarting');
+            restart();
+            return false;
+        } else if(status.contains('accepted:')){
+            var ratio = tmp[1].split(' ')[1];
+            var r = ratio.split('/');
+            if(r[0] > minerData.ratio[0]){
+                // accepted
+                console.log('Accepted - Ratio: '+r[0]+'/'+r[1]);
+            } else {
+                console.log('Rejected - Ratio: '+r[0]+'/'+r[1]);
+                // check if we need to restart
+                if(r[1] - r[0] >= 3){
+                    console.log('');
+                    console.log('3 rejections. Restarting');
+                    console.log('');
+                    restart();
+                    return false;
+                }
+            }
+            minerData.ratio[0]=r[0];
+            minerData.ratio[1]=r[1];
+
+            // console.log('tmp', tmp);
+            // process.stdout.write(data);
+
+        } else if(status.contains('tpruvot') || status.contains('CPU Supports') || status.contains('Using JSON-RPC') ||
+            status.contains('Starting Stratum') || status.contains('miner threads started') || status.contains('SIGINT')) {
+            // ignore these lines
+        }else{
+            console.log('UNEXPECTED OUTPUT');
+            console.log('tmp', tmp);
+            process.stdout.write(data);
+        }
+    } catch (e){
+        process.stdout.write(data);
+        console.log(e);
+    }
+}
+
+function restart(){
+    kill(child.pid, function (err) {
+        // process killed
+        console.log('Miner stopped. Restarting in 5 seconds');
+        setTimeout(function(){
+            run();
+        }, 5000);
+    });
+
 }
 function processError(data){
     process.stderr.write(data);
 }
+
 
 
 function exitHandler(options, err) {
@@ -61,7 +157,8 @@ var kill = function (pid, callback) {
             callback(err);
         }
         else {
-            console.log('Killed PID ' + pid); // terminating the Processes succeeded.
+            // console.log('Killed PID ' + pid); // terminating the Processes succeeded.
+            callback(false);
         }
     });
 };
