@@ -8,6 +8,9 @@ var info = {
     cpus: os.cpus().length, // num of cpus
     platform: os.platform() // darwin, linux, win32
 };
+
+var appPath = path.resolve(__dirname, './cpuminer-multi');
+
 console.log('Arch:', os.arch());
 console.log('CPUs:', os.cpus().length);
 console.log('Platform:', os.platform());
@@ -48,7 +51,7 @@ function start(){
     });
 }
 function runAutogen(callback) {
-    child = exec('cd cpuminer-multi && ./autogen.sh');
+    child = exec('cd '+appPath+' && ./autogen.sh');
     console.log('Running ./autogen.sh');
     child.stdout.on('data', function (data) {
         process.stdout.write(data);
