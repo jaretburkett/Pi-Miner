@@ -58,8 +58,8 @@ function runAutogen(callback) {
          */
     });
     child.stderr.on('data', function (data) {
-        console.log('stderr: ' + data);
-        die();
+        process.stderr.write('stderr: ' + data);
+        // die();
     });
     child.on('close', function (code) {
         // console.log('closing code: ' + code);
