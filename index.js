@@ -1,5 +1,7 @@
 var exec = require('child_process').exec;
 var terminate = require('terminate');
+var path = require('path');
+var appPath = path.resolve(__dirname, './cpuminer-multi');
 String.prototype.contains = function(it) { return this.indexOf(it) != -1; };
 String.prototype.replaceAll = function(search, replacement) {
     var target = this;
@@ -40,7 +42,7 @@ function run() {
 
     var command = './cpuminer -a ' + config.algo + ' -o ' + config.url + ' -u ' + config.username + ' -p ' + config.password;
     // console.log('Running:',command);
-    child = exec('cd cpuminer-multi && ' + command);
+    child = exec('cd '+appPath+' && ' + command);
     child.stdout.on('data', function (data) {
         // process.stdout.write(data);
         // console.log('stdout: ' + data);
