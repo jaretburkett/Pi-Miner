@@ -9,6 +9,7 @@ var info = {
     platform: os.platform()
 };
 var config = require('./config');
+
 var minerData = {
     cpu:[],
     hashrate:0,
