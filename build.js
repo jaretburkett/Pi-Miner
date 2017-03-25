@@ -97,7 +97,7 @@ function runNoMacro(callback) {
 function getFlags() {
     var flags = '-march=native';
     if (info.arch == 'arm' || info.arch == 'arm64') {
-        flags += ' -O3 -mfpu=neon';
+        flags += ' -mfpu=neon';
     }
     return flags;
 }
@@ -106,7 +106,7 @@ function make() {
     var errors = [];
     var success = true;
     console.log('Building');
-    child = exec('cd '+appPath+' && make');
+    child = exec('cd '+appPath+' && make clean && make');
     child.stdout.on('data', function (data) {
         process.stdout.write(data);
     });
