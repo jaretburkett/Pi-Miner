@@ -75,7 +75,7 @@ function runAutogen(callback) {
 }
 
 function runNoMacro(callback) {
-    child = exec('cd cpuminer-multi && ./nomacro.pl');
+    child = exec('cd '+appPath+' && ./nomacro.pl');
     console.log('Running ./nomacro.pl');
     child.stdout.on('data', function (data) {
         process.stdout.write(data);
@@ -106,7 +106,7 @@ function make() {
     var errors = [];
     var success = true;
     console.log('Building');
-    child = exec('cd cpuminer-multi && make');
+    child = exec('cd '+appPath+' && make');
     child.stdout.on('data', function (data) {
         process.stdout.write(data);
     });
@@ -152,7 +152,7 @@ function showErrors(arr){
 function configure() {
     var errors = [];
     var command = './configure CFLAGS="' + getFlags() + '" --with-crypto --with-curl';
-    child = exec('cd cpuminer-multi && ' + command);
+    child = exec('cd '+appPath+' && ' + command);
     console.log('Running ' + command);
     child.stdout.on('data', function (data) {
         process.stdout.write(data);
