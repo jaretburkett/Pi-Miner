@@ -1,6 +1,6 @@
 module.exports = {
     algo: 'cryptonight',
-    url:'stratum+tcp://pool.minexmr.com:4444',
-    username:'4446JfHRLisM9r4KRGEMNmQuhyXGgc1tTj9erhSXMkr4VZAvNCs9PcciK3puHiyVZ4ENMDxwKy5i9PKpjXHcSr2wM8ZHi89.miner2',
+    url:'stratum+tcp://cryptonight.eu.nicehash.com:3355',
+    username:'12bNfSXoSpE3Pm1EQZw2SQv1pYDF3zzZvi.miniminer',
     password:'4'
 };
