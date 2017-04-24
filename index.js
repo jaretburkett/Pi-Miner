@@ -101,7 +101,7 @@ function processOutput(data){
                 str += minerData.cpu[i].rate + ' '+ minerData.cpu[i].type + '   ';
                 cpuTotal += minerData.cpu[i].rate;
             }
-            str += 'TOTAL: '+cpuTotal+ ' ' + minerData.cpu[i].type;
+            str += 'TOTAL: '+cpuTotal+ ' ' + minerData.cpu[0].type;
             console.log(str);
         } else if(status.contains('Stratum difficulty')){
             minerData.difficulty = parseInt(tmp[1].split(' ')[4]);
