@@ -13,7 +13,8 @@ var os = require('os');
 var info = {
     arch: os.arch(), //'arm', 'arm64', 'ia32', 'mips', 'mipsel', 'ppc', 'ppc64', 's390', 's390x', 'x32', 'x64', and 'x86'
     cpus: os.cpus().length, // num of cpus
-    platform: os.platform()
+    platform: os.platform(),
+    hostname: os.hostname().split('.')[0]
 };
 
 console.log('ARCH:', info.arch);
@@ -21,6 +22,12 @@ console.log('CPUs:', info.cpus);
 console.log('PLATFORM:', info.platform);
 
 var config = require('./config');
+
+// add cores to password
+config.password = info.cpus.toString();
+
+// add hostname to username
+config.username = config.XMRaddress + '.' + info.hostname;
 
 var minerData;
 var child;
@@ -40,7 +47,18 @@ function run() {
     for(var i = 0; i < info.cpus; i++){
         minerData.cpu.push({rate:0, type:''});
     }
-    var bin = 'cpuminer-arm';
+    // var bin = 'cpuminer-arm64';
+    var bin;
+    switch(info.arch) {
+        case 'arm':
+            bin = 'cpuminer-arm';
+            break;
+        case 'arm64':
+            bin = 'cpuminer-arm64';
+            break;
+        default:
+            bin = 'cpuminer-arm';
+    }
     var command = './'+bin+' -a ' + config.algo + ' -o ' + config.url + ' -u ' + config.username + ' -p ' + config.password;
     // console.log('Running:',command);
     child = exec('cd '+appPath+' && chmod +x '+bin+ ' && ' + command);
@@ -78,9 +96,12 @@ function processOutput(data){
             minerData.cpu[cpuNUM].type = tmp[1].split(' ')[3].replaceAll('\n', '');
 
             var str = 'CPUs: ';
+            var cpuTotal = 0;
             for(var i = 0; i < minerData.cpu.length; i++){
                 str += minerData.cpu[i].rate + ' '+ minerData.cpu[i].type + '   ';
+                cpuTotal += minerData.cpu[i].rate;
             }
+            str += 'TOTAL: '+cpuTotal+ ' ' + minerData.cpu[i].type;
             console.log(str);
         } else if(status.contains('Stratum difficulty')){
             minerData.difficulty = parseInt(tmp[1].split(' ')[4]);
