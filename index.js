@@ -40,7 +40,7 @@ function run() {
     for(var i = 0; i < info.cpus; i++){
         minerData.cpu.push({rate:0, type:''});
     }
-    var bin = 'cpuminer-arm';
+    var bin = 'cpuminer-arm64';
     var command = './'+bin+' -a ' + config.algo + ' -o ' + config.url + ' -u ' + config.username + ' -p ' + config.password;
     // console.log('Running:',command);
     child = exec('cd '+appPath+' && chmod +x '+bin+ ' && ' + command);
