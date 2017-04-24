@@ -99,9 +99,9 @@ function processOutput(data){
             var cpuTotal = 0;
             for(var i = 0; i < minerData.cpu.length; i++){
                 str += minerData.cpu[i].rate + ' '+ minerData.cpu[i].type + '   ';
-                cpuTotal += minerData.cpu[i].rate;
+                cpuTotal = parseFloat(minerData.cpu[i].rate) + cpuTotal;
             }
-            str += 'TOTAL: '+cpuTotal+ ' ' + minerData.cpu[0].type;
+            str += 'TOTAL: '+cpuTotal.toFixed(3)+ ' ' + minerData.cpu[0].type;
             console.log(str);
         } else if(status.contains('Stratum difficulty')){
             minerData.difficulty = parseInt(tmp[1].split(' ')[4]);
